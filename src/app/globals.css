@@ -1,1 +1,169 @@
 @import "tailwindcss";
+
+/* Default, Dark Theme: Midnight */
+:root,
+[data-theme="midnight"] {
+  color-scheme: dark;
+
+  --background: #11131b;
+  --surface: #191c27;
+  --surface-hover: #242838;
+  --surface-elevated: #202433;
+
+  --foreground: #f4f4f8;
+  --muted: #9297a8;
+
+  --border: #2b3040;
+
+  --accent: #a78bfa;
+  --accent-hover: #9272ef;
+  --accent-soft: #30264b;
+
+  --success: #4ade80;
+  --danger: #fb7185;
+}
+
+/* Dark Theme: Ocean */
+[data-theme="ocean"] {
+  color-scheme: dark;
+
+  --background: #0b1724;
+  --surface: #102131;
+  --surface-hover: #1a3043;
+  --surface-elevated: #172c3d;
+
+  --foreground: #e8f4fc;
+  --muted: #91a9ba;
+
+  --border: #263e50;
+
+  --accent: #38bdf8;
+  --accent-hover: #0ea5e9;
+  --accent-soft: #153b53;
+
+  --success: #4ade80;
+  --danger: #fb7185;
+}
+
+/* Dark Theme: Forest */
+[data-theme="forest"] {
+  color-scheme: dark;
+
+  --background: #101b18;
+  --surface: #182720;
+  --surface-hover: #24382e;
+  --surface-elevated: #203229;
+
+  --foreground: #edf7f0;
+  --muted: #9aafa1;
+
+  --border: #304539;
+
+  --accent: #6ee7b7;
+  --accent-hover: #4fd1a0;
+  --accent-soft: #1d4033;
+
+  --success: #86efac;
+  --danger: #fb7185;
+}
+
+/* Light Theme: Daylight */
+[data-theme="daylight"] {
+  color-scheme: light;
+
+  --background: #f8f8fc;
+  --surface: #ffffff;
+  --surface-hover: #f0eff8;
+  --surface-elevated: #ffffff;
+
+  --foreground: #202033;
+  --muted: #77778d;
+
+  --border: #e5e3ef;
+
+  --accent: #7c3aed;
+  --accent-hover: #6d28d9;
+  --accent-soft: #eee7ff;
+
+  --success: #16a34a;
+  --danger: #e11d48;
+}
+
+/* Light Theme: Sunset */
+[data-theme="sunset"] {
+  color-scheme: light;
+
+  --background: #fff9f5;
+  --surface: #ffffff;
+  --surface-hover: #fff0e8;
+  --surface-elevated: #ffffff;
+
+  --foreground: #30221e;
+  --muted: #927d74;
+
+  --border: #f0ded4;
+
+  --accent: #f07850;
+  --accent-hover: #df613b;
+  --accent-soft: #ffe5d9;
+
+  --success: #16865b;
+  --danger: #dc4560;
+}
+
+/* Variable Mapping */
+@theme inline {
+  /* colors */
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-elevated: var(--surface-elevated);
+
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+
+  --color-border: var(--border);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+
+  /* fonts */
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Global Styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+    background-color: var(--background);
+    color: var(--foreground);
+    transition:
+      background-color 200ms ease,
+      color 200ms ease;
+  }
+
+  ::selection {
+    background-color: var(--accent-soft);
+    color: var(--foreground);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+}
