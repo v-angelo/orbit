@@ -1,0 +1,135 @@
+import { Code2, Gamepad2, type LucideIcon } from "lucide-react";
+
+export interface Channel {
+  id: string;
+  name: string;
+  type: "text" | "voice";
+}
+
+export interface Community {
+  id: string;
+  name: string;
+  icon: LucideIcon;
+  color: string;
+  channels: Channel[];
+}
+
+export interface MockMessage {
+  id: string;
+  author: string;
+  initials: string;
+  timestamp: string;
+  content: string;
+  avatar: "accent" | "neutral";
+}
+
+export const communities: Community[] = [
+  {
+    id: "gaming",
+    name: "Gaming",
+    icon: Gamepad2,
+    color: "#a78bfa",
+    channels: [
+      { id: "general", name: "general", type: "text" },
+      { id: "introductions", name: "introductions", type: "text" },
+      { id: "announcements", name: "announcements", type: "text" },
+      { id: "share-projects", name: "share-projects", type: "text" },
+      { id: "lounge", name: "Lounge", type: "voice" },
+      { id: "gaming-voice", name: "Gaming", type: "voice" },
+    ],
+  },
+  {
+    id: "developers",
+    name: "Developers",
+    icon: Code2,
+    color: "#38bdf8",
+    channels: [
+      { id: "dev-general", name: "general", type: "text" },
+      { id: "frontend", name: "frontend", type: "text" },
+      { id: "backend", name: "backend", type: "text" },
+      { id: "resources", name: "resources", type: "text" },
+      { id: "coworking", name: "Coworking", type: "voice" },
+    ],
+  },
+];
+
+export const mockMessages: Record<string, MockMessage[]> = {
+  general: [
+    {
+      id: "1",
+      author: "Alex Morgan",
+      initials: "A",
+      timestamp: "10:30 AM",
+      content: "Hey everyone! Welcome to our community.",
+      avatar: "accent",
+    },
+    {
+      id: "2",
+      author: "Sam Wilson",
+      initials: "S",
+      timestamp: "10:32 AM",
+      content: "Thanks for having me here! Excited to be part of this.",
+      avatar: "neutral",
+    },
+    {
+      id: "3",
+      author: "Jordan Lee",
+      initials: "J",
+      timestamp: "10:35 AM",
+      content: "Anyone working on something interesting lately?",
+      avatar: "accent",
+    },
+  ],
+
+  introductions: [
+    {
+      id: "4",
+      author: "Taylor Smith",
+      initials: "T",
+      timestamp: "11:15 AM",
+      content: "Hello everyone! I'm Taylor. Great to meet you all!",
+      avatar: "neutral",
+    },
+  ],
+
+  "dev-general": [
+    {
+      id: "5",
+      author: "Alex Morgan",
+      initials: "A",
+      timestamp: "09:15 AM",
+      content: "What technologies is everyone working with lately?",
+      avatar: "accent",
+    },
+    {
+      id: "6",
+      author: "Jordan Lee",
+      initials: "J",
+      timestamp: "09:20 AM",
+      content: "Currently exploring Next.js and TypeScript. Really enjoying the experience!",
+      avatar: "neutral",
+    },
+  ],
+
+  frontend: [
+    {
+      id: "7",
+      author: "Sam Wilson",
+      initials: "S",
+      timestamp: "12:10 PM",
+      content: "Does anyone have recommendations for component libraries?",
+      avatar: "accent",
+    },
+  ],
+
+  backend: [
+    {
+      id: "8",
+      author: "Morgan Reed",
+      initials: "M",
+      timestamp: "01:30 PM",
+      content: "I've been experimenting with Node.js and MongoDB recently.",
+      avatar: "neutral",
+    },
+  ],
+};

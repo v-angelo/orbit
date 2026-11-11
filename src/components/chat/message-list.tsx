@@ -1,66 +1,66 @@
-const messages = [
-  {
-    id: 1,
-    name: "Alex Morgan",
-    initials: "A",
-    time: "10:30 AM",
-    color: "bg-accent-soft text-accent",
-    content: "Hey everyone! Welcome to our community.",
-  },
-  {
-    id: 2,
-    name: "Sam Wilson",
-    initials: "S",
-    time: "10:32 AM",
-    color: "bg-(--accent-soft) text-accent",
-    content: "Thanks for having me here! Excited to be part of this.",
-  },
-  {
-    id: 3,
-    name: "Jordan Lee",
-    initials: "J",
-    time: "10:35 AM",
-    color: "bg-surface-hover text-foreground",
-    content: "Anyone working on something interesting lately?",
-  },
-  {
-    id: 4,
-    name: "Alex Morgan",
-    initials: "A",
-    time: "10:38 AM",
-    color: "bg-accent-soft text-accent",
-    content: "I've been building a small web application. Happy to share it soon!",
-  },
-];
+"use client";
+
+import { Hash } from "lucide-react";
+
+import { useCommunity } from "@/context/community-context";
 
 export default function MessageList() {
+  const { selectedChannelId, messages } = useCommunity();
+
+  const channelMessages = messages[selectedChannelId] ?? [];
+
   return (
-    <div className="flex-1 space-y-6 overflow-y-auto p-5">
-      <div className="my-4 flex items-center gap-4">
-        <div className="h-px flex-1 bg-border" />
-        <span className="text-xs text-muted">Today</span>
-        <div className="h-px flex-1 bg-border" />
-      </div>
-
-      {messages.map((message) => (
-        <article key={message.id} className="flex gap-3">
-          <div
-            className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${message.color}`}
-          >
-            {message.initials}
+    <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5">
+      {channelMessages.length > 0 ? (
+        <>
+          {/* Date Divider */}
+          <div className="my-4 flex items-center gap-4">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-xs text-muted">Today</span>
+            <div className="h-px flex-1 bg-border" />
           </div>
 
-          <div className="min-w-0 flex-1">
-            <div className="mb-1 flex flex-wrap items-baseline gap-2">
-              <span className="text-sm font-semibold text-foreground">{message.name}</span>
+          {/* Messages */}
+          {channelMessages.map((message) => (
+            <article key={message.id} className="flex gap-3">
+              <div
+                className={`flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
+                  message.avatar === "accent"
+                    ? "bg-accent-soft text-accent"
+                    : "bg-surface-hover text-foreground"
+                }`}
+              >
+                {message.initials}
+              </div>
 
-              <span className="text-xs text-muted">{message.time}</span>
-            </div>
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex flex-wrap items-baseline gap-2">
+                  <span className="text-sm font-semibold text-foreground">{message.author}</span>
 
-            <p className="text-sm leading-relaxed text-muted">{message.content}</p>
+                  <span className="text-xs text-muted">{message.timestamp}</span>
+                </div>
+
+                <p className="text-sm leading-relaxed text-muted">{message.content}</p>
+              </div>
+            </article>
+          ))}
+        </>
+      ) : (
+        /* Empty Channel State */
+        <div className="flex min-h-full flex-col items-center justify-center py-16 text-center">
+          <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-accent-soft text-accent">
+            <Hash size={26} />
           </div>
-        </article>
-      ))}
+
+          <h2 className="text-lg font-semibold text-foreground">
+            Welcome to the beginning of this channel!
+          </h2>
+
+          <p className="mt-2 max-w-sm text-sm text-muted">
+            This is the start of the conversation. Send a message to get things going.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

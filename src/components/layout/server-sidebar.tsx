@@ -1,11 +1,12 @@
-import { Compass, Gamepad2, Plus, Settings } from "lucide-react";
+"use client";
 
-const servers = [
-  { id: "gaming", name: "Gaming", icon: Gamepad2, color: "#a78bfa" },
-  { id: "developers", name: "Developers", icon: Settings, color: "#38bdf8" },
-];
+import { Compass, Plus, Settings } from "lucide-react";
+import { communities } from "@/constants/mock-data";
+import { useCommunity } from "@/context/community-context";
 
 export default function ServerSidebar() {
+  const { selectedCommunityId, selectCommunity } = useCommunity();
+
   return (
     <aside className="flex min-h-screen flex-col items-center gap-4 border-r border-border bg-surface py-4">
       <div
@@ -17,31 +18,43 @@ export default function ServerSidebar() {
 
       <div className="h-px w-8 bg-border" />
 
-      {servers.map((server) => {
-        const Icon = server.icon;
+      {communities.map((community) => {
+        const Icon = community.icon;
+        const isActive = selectedCommunityId === community.id;
 
         return (
-          <div
-            key={server.id}
-            title={server.name}
-            className="flex size-11 cursor-pointer items-center justify-center rounded-2xl transition-colors hover:bg-surface-hover"
-            style={{ color: server.color }}
+          <button
+            key={community.id}
+            type="button"
+            title={community.name}
+            onClick={() => selectCommunity(community.id)}
+            className={`relative flex size-11 items-center justify-center rounded-2xl transition-all duration-200 ${
+              isActive ? "rounded-xl bg-accent-soft" : "hover:rounded-xl hover:bg-surface-hover"
+            }`}
+            style={{ color: community.color }}
           >
+            {isActive && <span className="absolute -left-4.5 h-6 w-1 rounded-r-full bg-accent" />}
+
             <Icon size={22} />
-          </div>
+          </button>
         );
       })}
 
-      <div
+      <button
+        type="button"
         title="Add a community"
-        className="flex size-11 cursor-pointer items-center justify-center rounded-2xl text-success transition-colors hover:bg-surface-hover"
+        className="flex size-11 items-center justify-center rounded-2xl text-success transition-colors hover:bg-surface-hover"
       >
         <Plus size={23} />
-      </div>
+      </button>
 
-      <div className="mt-auto flex size-11 items-center justify-center rounded-2xl bg-surface-hover text-muted">
+      <button
+        type="button"
+        title="Settings"
+        className="mt-auto flex size-11 items-center justify-center rounded-2xl text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+      >
         <Settings size={21} />
-      </div>
+      </button>
     </aside>
   );
 }
