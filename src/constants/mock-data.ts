@@ -23,6 +23,13 @@ export interface MockMessage {
   avatar: "accent" | "neutral";
 }
 
+export interface MockMember {
+  id: string;
+  name: string;
+  status: "online" | "offline";
+  role: "admin" | "moderator" | "member";
+}
+
 export const communities: Community[] = [
   {
     id: "gaming",
@@ -131,5 +138,21 @@ export const mockMessages: Record<string, MockMessage[]> = {
       content: "I've been experimenting with Node.js and MongoDB recently.",
       avatar: "neutral",
     },
+  ],
+};
+
+export const membersByCommunity: Record<string, MockMember[]> = {
+  gaming: [
+    { id: "alex", name: "Alex Morgan", status: "online", role: "admin" },
+    { id: "sam", name: "Sam Wilson", status: "online", role: "moderator" },
+    { id: "jordan", name: "Jordan Lee", status: "online", role: "member" },
+    { id: "taylor", name: "Taylor Smith", status: "offline", role: "member" },
+    { id: "morgan", name: "Morgan Reed", status: "offline", role: "moderator" },
+  ],
+  developers: [
+    { id: "chris", name: "Chris Evans", status: "online", role: "admin" },
+    { id: "jamie", name: "Jamie Parker", status: "online", role: "moderator" },
+    { id: "riley", name: "Riley Cooper", status: "offline", role: "member" },
+    { id: "casey", name: "Casey Brooks", status: "offline", role: "member" },
   ],
 };

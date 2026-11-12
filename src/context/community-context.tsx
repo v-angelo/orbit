@@ -5,13 +5,20 @@ import { createContext, useContext, useState, type ReactNode } from "react";
 import { communities, mockMessages } from "@/constants/mock-data";
 import type { MockMessage } from "@/constants/mock-data";
 
+type ActiveDrawer = "channels" | "members" | null;
+
 interface CommunityContextType {
   selectedCommunityId: string;
   selectedChannelId: string;
   messages: Record<string, MockMessage[]>;
+  activeDrawer: ActiveDrawer;
+  isMemberSidebarOpen: boolean;
   selectCommunity: (communityId: string) => void;
   selectChannel: (channelId: string) => void;
   sendMessage: (content: string) => void;
+  openDrawer: (drawer: ActiveDrawer) => void;
+  closeDrawer: () => void;
+  toggleMemberSidebar: () => void;
 }
 
 const CommunityContext = createContext<CommunityContextType | undefined>(undefined);
@@ -24,6 +31,20 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
   const [selectedCommunityId, setSelectedCommunityId] = useState("gaming");
   const [selectedChannelId, setSelectedChannelId] = useState("general");
   const [messages, setMessages] = useState<Record<string, MockMessage[]>>(mockMessages);
+  const [activeDrawer, setActiveDrawer] = useState<ActiveDrawer>(null);
+  const [isMemberSidebarOpen, setIsMemberSidebarOpen] = useState(true);
+
+  const openDrawer = (drawer: ActiveDrawer) => {
+    setActiveDrawer(drawer);
+  };
+
+  const closeDrawer = () => {
+    setActiveDrawer(null);
+  };
+
+  const toggleMemberSidebar = () => {
+    setIsMemberSidebarOpen((previous) => !previous);
+  };
 
   const selectCommunity = (communityId: string) => {
     const community = communities.find((item) => item.id === communityId);
@@ -37,6 +58,8 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
     if (firstTextChannel) {
       setSelectedChannelId(firstTextChannel.id);
     }
+
+    closeDrawer();
   };
 
   const selectChannel = (channelId: string) => {
@@ -47,6 +70,7 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
     if (!channel || channel.type !== "text") return;
 
     setSelectedChannelId(channelId);
+    closeDrawer();
   };
 
   const sendMessage = (content: string) => {
@@ -78,9 +102,14 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
         selectedCommunityId,
         selectedChannelId,
         messages,
+        activeDrawer,
+        isMemberSidebarOpen,
         selectCommunity,
         selectChannel,
         sendMessage,
+        openDrawer,
+        closeDrawer,
+        toggleMemberSidebar,
       }}
     >
       {children}
