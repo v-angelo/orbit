@@ -12,7 +12,7 @@ export default function MemberSidebar() {
   const offlineMembers = members.filter((member) => member.status === "offline");
 
   return (
-    <aside className="min-h-screen border-l border-border bg-surface p-4">
+    <aside className="flex h-full min-h-0 flex-col border-l border-border bg-surface p-4">
       <h2 className="mb-5 text-sm font-semibold text-foreground">Members — {members.length}</h2>
 
       {/* Online Members */}

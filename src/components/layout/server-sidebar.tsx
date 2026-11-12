@@ -8,7 +8,7 @@ export default function ServerSidebar() {
   const { selectedCommunityId, selectCommunity } = useCommunity();
 
   return (
-    <aside className="flex min-h-screen flex-col items-center gap-4 border-r border-border bg-surface py-4">
+    <aside className="flex h-dvh flex-col items-center gap-4 overflow-y-auto border-r border-border bg-surface py-4">
       <div
         title="Orbit"
         className="flex size-11 items-center justify-center rounded-2xl bg-accent text-background"

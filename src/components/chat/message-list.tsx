@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Hash } from "lucide-react";
 
 import { useCommunity } from "@/context/community-context";
@@ -9,8 +10,17 @@ export default function MessageList() {
 
   const channelMessages = messages[selectedChannelId] ?? [];
 
+  const messageEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messageEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [selectedChannelId, channelMessages.length]);
+
   return (
-    <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-5">
+    <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 pt-5">
       {channelMessages.length > 0 ? (
         <>
           {/* Date Divider */}
@@ -40,7 +50,9 @@ export default function MessageList() {
                   <span className="text-xs text-muted">{message.timestamp}</span>
                 </div>
 
-                <p className="text-sm leading-relaxed text-muted">{message.content}</p>
+                <p className="text-sm leading-relaxed whitespace-pre-wrap text-muted">
+                  {message.content}
+                </p>
               </div>
             </article>
           ))}
@@ -61,6 +73,9 @@ export default function MessageList() {
           </p>
         </div>
       )}
+
+      {/* Scroll Target */}
+      <div ref={messageEndRef} className="h-0" />
     </div>
   );
 }

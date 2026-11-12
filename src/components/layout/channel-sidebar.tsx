@@ -17,7 +17,7 @@ export default function ChannelSidebar() {
   const voiceChannels = selectedCommunity.channels.filter((channel) => channel.type === "voice");
 
   return (
-    <aside className="flex min-h-screen flex-col border-r border-border bg-surface">
+    <aside className="flex h-full min-h-0 flex-col border-r border-border bg-surface">
       {/* Community Header */}
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-border px-4">
         <div className="flex items-center gap-2">
