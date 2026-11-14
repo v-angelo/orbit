@@ -88,6 +88,7 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
       }),
       content: trimmedContent,
       avatar: "accent",
+      reactions: [],
     };
 
     setMessages((previousMessages) => ({

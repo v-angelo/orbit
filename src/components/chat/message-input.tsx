@@ -1,6 +1,6 @@
 "use client";
 
-import { type SyntheticEvent, useRef, useState } from "react";
+import { useState, useRef, type SyntheticEvent } from "react";
 import { Image, Plus, Send, Smile } from "lucide-react";
 
 import { communities } from "@/constants/mock-data";

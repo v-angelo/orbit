@@ -14,6 +14,12 @@ export interface Community {
   channels: Channel[];
 }
 
+export interface MockReaction {
+  emoji: string;
+  count: number;
+  reacted: boolean;
+}
+
 export interface MockMessage {
   id: string;
   author: string;
@@ -21,6 +27,7 @@ export interface MockMessage {
   timestamp: string;
   content: string;
   avatar: "accent" | "neutral";
+  reactions: MockReaction[];
 }
 
 export interface MockMember {
@@ -69,6 +76,10 @@ export const mockMessages: Record<string, MockMessage[]> = {
       timestamp: "10:30 AM",
       content: "Hey everyone! Welcome to our community.",
       avatar: "accent",
+      reactions: [
+        { emoji: "👋", count: 3, reacted: false },
+        { emoji: "❤️", count: 2, reacted: true },
+      ],
     },
     {
       id: "2",
@@ -77,6 +88,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       timestamp: "10:32 AM",
       content: "Thanks for having me here! Excited to be part of this.",
       avatar: "neutral",
+      reactions: [{ emoji: "🎉", count: 2, reacted: false }],
     },
     {
       id: "3",
@@ -85,6 +97,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       timestamp: "10:35 AM",
       content: "Anyone working on something interesting lately?",
       avatar: "accent",
+      reactions: [],
     },
   ],
 
@@ -96,6 +109,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       timestamp: "11:15 AM",
       content: "Hello everyone! I'm Taylor. Great to meet you all!",
       avatar: "neutral",
+      reactions: [{ emoji: "👋", count: 4, reacted: false }],
     },
   ],
 
@@ -107,6 +121,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       timestamp: "09:15 AM",
       content: "What technologies is everyone working with lately?",
       avatar: "accent",
+      reactions: [],
     },
     {
       id: "6",
@@ -115,6 +130,10 @@ export const mockMessages: Record<string, MockMessage[]> = {
       timestamp: "09:20 AM",
       content: "Currently exploring Next.js and TypeScript. Really enjoying the experience!",
       avatar: "neutral",
+      reactions: [
+        { emoji: "🔥", count: 3, reacted: false },
+        { emoji: "💯", count: 1, reacted: true },
+      ],
     },
   ],
 
@@ -126,6 +145,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       timestamp: "12:10 PM",
       content: "Does anyone have recommendations for component libraries?",
       avatar: "accent",
+      reactions: [],
     },
   ],
 
@@ -137,6 +157,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       timestamp: "01:30 PM",
       content: "I've been experimenting with Node.js and MongoDB recently.",
       avatar: "neutral",
+      reactions: [],
     },
   ],
 };
