@@ -19,6 +19,9 @@ interface CommunityContextType {
   openDrawer: (drawer: ActiveDrawer) => void;
   closeDrawer: () => void;
   toggleMemberSidebar: () => void;
+  toggleReaction: (messageId: string, emoji: string) => void;
+  editMessage: (messageId: string, content: string) => void;
+  deleteMessage: (messageId: string) => void;
 }
 
 const CommunityContext = createContext<CommunityContextType | undefined>(undefined);
@@ -89,11 +92,87 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
       content: trimmedContent,
       avatar: "accent",
       reactions: [],
+      isOwn: true,
     };
 
     setMessages((previousMessages) => ({
       ...previousMessages,
       [selectedChannelId]: [...(previousMessages[selectedChannelId] ?? []), newMessage],
+    }));
+  };
+
+  const toggleReaction = (messageId: string, emoji: string) => {
+    setMessages((previousMessages) => ({
+      ...previousMessages,
+      [selectedChannelId]: (previousMessages[selectedChannelId] ?? []).map((message) => {
+        if (message.id !== messageId) return message;
+
+        const existingReaction = message.reactions.find((reaction) => reaction.emoji === emoji);
+
+        // Add a new reaction
+        if (!existingReaction) {
+          return {
+            ...message,
+            reactions: [...message.reactions, { emoji, count: 1, reacted: true }],
+          };
+        }
+
+        // Remove the user's reaction
+        if (existingReaction.reacted) {
+          return {
+            ...message,
+            reactions: message.reactions
+              .map((reaction) =>
+                reaction.emoji === emoji
+                  ? {
+                      ...reaction,
+                      count: reaction.count - 1,
+                      reacted: false,
+                    }
+                  : reaction,
+              )
+              .filter((reaction) => reaction.count > 0),
+          };
+        }
+
+        // Add the user's reaction to an existing emoji
+        return {
+          ...message,
+          reactions: message.reactions.map((reaction) =>
+            reaction.emoji === emoji
+              ? {
+                  ...reaction,
+                  count: reaction.count + 1,
+                  reacted: true,
+                }
+              : reaction,
+          ),
+        };
+      }),
+    }));
+  };
+
+  const editMessage = (messageId: string, content: string) => {
+    const trimmedContent = content.trim();
+
+    if (!trimmedContent) return;
+
+    setMessages((previousMessages) => ({
+      ...previousMessages,
+      [selectedChannelId]: (previousMessages[selectedChannelId] ?? []).map((message) =>
+        message.id === messageId && message.isOwn
+          ? { ...message, content: trimmedContent }
+          : message,
+      ),
+    }));
+  };
+
+  const deleteMessage = (messageId: string) => {
+    setMessages((previousMessages) => ({
+      ...previousMessages,
+      [selectedChannelId]: (previousMessages[selectedChannelId] ?? []).filter(
+        (message) => message.id !== messageId || !message.isOwn,
+      ),
     }));
   };
 
@@ -108,9 +187,12 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
         selectCommunity,
         selectChannel,
         sendMessage,
+        toggleReaction,
         openDrawer,
         closeDrawer,
         toggleMemberSidebar,
+        editMessage,
+        deleteMessage,
       }}
     >
       {children}

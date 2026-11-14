@@ -28,6 +28,7 @@ export interface MockMessage {
   content: string;
   avatar: "accent" | "neutral";
   reactions: MockReaction[];
+  isOwn: boolean;
 }
 
 export interface MockMember {
@@ -80,6 +81,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
         { emoji: "👋", count: 3, reacted: false },
         { emoji: "❤️", count: 2, reacted: true },
       ],
+      isOwn: false,
     },
     {
       id: "2",
@@ -89,7 +91,9 @@ export const mockMessages: Record<string, MockMessage[]> = {
       content: "Thanks for having me here! Excited to be part of this.",
       avatar: "neutral",
       reactions: [{ emoji: "🎉", count: 2, reacted: false }],
+      isOwn: false,
     },
+
     {
       id: "3",
       author: "Jordan Lee",
@@ -98,6 +102,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       content: "Anyone working on something interesting lately?",
       avatar: "accent",
       reactions: [],
+      isOwn: false,
     },
   ],
 
@@ -110,6 +115,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       content: "Hello everyone! I'm Taylor. Great to meet you all!",
       avatar: "neutral",
       reactions: [{ emoji: "👋", count: 4, reacted: false }],
+      isOwn: false,
     },
   ],
 
@@ -122,6 +128,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       content: "What technologies is everyone working with lately?",
       avatar: "accent",
       reactions: [],
+      isOwn: false,
     },
     {
       id: "6",
@@ -134,6 +141,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
         { emoji: "🔥", count: 3, reacted: false },
         { emoji: "💯", count: 1, reacted: true },
       ],
+      isOwn: false,
     },
   ],
 
@@ -146,6 +154,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       content: "Does anyone have recommendations for component libraries?",
       avatar: "accent",
       reactions: [],
+      isOwn: false,
     },
   ],
 
@@ -158,6 +167,7 @@ export const mockMessages: Record<string, MockMessage[]> = {
       content: "I've been experimenting with Node.js and MongoDB recently.",
       avatar: "neutral",
       reactions: [],
+      isOwn: false,
     },
   ],
 };
