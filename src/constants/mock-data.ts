@@ -20,6 +20,12 @@ export interface MockReaction {
   reacted: boolean;
 }
 
+export interface MockReply {
+  messageId: string;
+  author: string;
+  content: string;
+}
+
 export interface MockMessage {
   id: string;
   author: string;
@@ -29,6 +35,7 @@ export interface MockMessage {
   avatar: "accent" | "neutral";
   reactions: MockReaction[];
   isOwn: boolean;
+  replyTo?: MockReply;
 }
 
 export interface MockMember {
@@ -92,8 +99,12 @@ export const mockMessages: Record<string, MockMessage[]> = {
       avatar: "neutral",
       reactions: [{ emoji: "🎉", count: 2, reacted: false }],
       isOwn: false,
+      replyTo: {
+        messageId: "1",
+        author: "Alex Morgan",
+        content: "Hey everyone! Welcome to our community.",
+      },
     },
-
     {
       id: "3",
       author: "Jordan Lee",
@@ -103,6 +114,21 @@ export const mockMessages: Record<string, MockMessage[]> = {
       avatar: "accent",
       reactions: [],
       isOwn: false,
+    },
+    {
+      id: "9",
+      author: "You",
+      initials: "Y",
+      timestamp: "10:37 AM",
+      content: "I'm currently building a community chat application called Orbit!",
+      avatar: "accent",
+      reactions: [{ emoji: "🔥", count: 2, reacted: false }],
+      isOwn: true,
+      replyTo: {
+        messageId: "3",
+        author: "Jordan Lee",
+        content: "Anyone working on something interesting lately?",
+      },
     },
   ],
 
@@ -142,6 +168,11 @@ export const mockMessages: Record<string, MockMessage[]> = {
         { emoji: "💯", count: 1, reacted: true },
       ],
       isOwn: false,
+      replyTo: {
+        messageId: "5",
+        author: "Alex Morgan",
+        content: "What technologies is everyone working with lately?",
+      },
     },
   ],
 

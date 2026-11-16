@@ -11,11 +11,14 @@ interface CommunityContextType {
   selectedCommunityId: string;
   selectedChannelId: string;
   messages: Record<string, MockMessage[]>;
+  replyToMessage: MockMessage | null;
   activeDrawer: ActiveDrawer;
   isMemberSidebarOpen: boolean;
   selectCommunity: (communityId: string) => void;
   selectChannel: (channelId: string) => void;
   sendMessage: (content: string) => void;
+  startReply: (messageId: string) => void;
+  cancelReply: () => void;
   openDrawer: (drawer: ActiveDrawer) => void;
   closeDrawer: () => void;
   toggleMemberSidebar: () => void;
@@ -34,6 +37,7 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
   const [selectedCommunityId, setSelectedCommunityId] = useState("gaming");
   const [selectedChannelId, setSelectedChannelId] = useState("general");
   const [messages, setMessages] = useState<Record<string, MockMessage[]>>(mockMessages);
+  const [replyToMessage, setReplyToMessage] = useState<MockMessage | null>(null);
   const [activeDrawer, setActiveDrawer] = useState<ActiveDrawer>(null);
   const [isMemberSidebarOpen, setIsMemberSidebarOpen] = useState(true);
 
@@ -57,6 +61,7 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
     const firstTextChannel = community.channels.find((channel) => channel.type === "text");
 
     setSelectedCommunityId(communityId);
+    setReplyToMessage(null);
 
     if (firstTextChannel) {
       setSelectedChannelId(firstTextChannel.id);
@@ -73,7 +78,20 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
     if (!channel || channel.type !== "text") return;
 
     setSelectedChannelId(channelId);
+    setReplyToMessage(null);
     closeDrawer();
+  };
+
+  const startReply = (messageId: string) => {
+    const message = (messages[selectedChannelId] ?? []).find((item) => item.id === messageId);
+
+    if (!message) return;
+
+    setReplyToMessage(message);
+  };
+
+  const cancelReply = () => {
+    setReplyToMessage(null);
   };
 
   const sendMessage = (content: string) => {
@@ -93,12 +111,21 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
       avatar: "accent",
       reactions: [],
       isOwn: true,
+      ...(replyToMessage && {
+        replyTo: {
+          messageId: replyToMessage.id,
+          author: replyToMessage.author,
+          content: replyToMessage.content,
+        },
+      }),
     };
 
     setMessages((previousMessages) => ({
       ...previousMessages,
       [selectedChannelId]: [...(previousMessages[selectedChannelId] ?? []), newMessage],
     }));
+
+    setReplyToMessage(null);
   };
 
   const toggleReaction = (messageId: string, emoji: string) => {
@@ -182,11 +209,14 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
         selectedCommunityId,
         selectedChannelId,
         messages,
+        replyToMessage,
         activeDrawer,
         isMemberSidebarOpen,
         selectCommunity,
         selectChannel,
         sendMessage,
+        startReply,
+        cancelReply,
         toggleReaction,
         openDrawer,
         closeDrawer,
