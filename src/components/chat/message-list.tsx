@@ -18,6 +18,8 @@ export default function MessageList() {
   const [activeMenuMessageId, setActiveMenuMessageId] = useState<string | null>(null);
   const [menuPlacement, setMenuPlacement] = useState<"above" | "below">("below");
 
+  const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
+
   useEffect(() => {
     if (channelMessages.length === 0) return;
 
@@ -53,6 +55,20 @@ export default function MessageList() {
     };
   }, [activeMenuMessageId]);
 
+  useEffect(() => {
+    if (!highlightedMessageId) return;
+
+    const timeout = window.setTimeout(() => {
+      setHighlightedMessageId(null);
+    }, 1600);
+
+    return () => window.clearTimeout(timeout);
+  }, [highlightedMessageId]);
+
+  useEffect(() => {
+    setHighlightedMessageId(null);
+  }, [selectedChannelId]);
+
   const handleToggleMenu = (messageId: string, button: HTMLButtonElement) => {
     if (activeMenuMessageId === messageId) {
       setActiveMenuMessageId(null);
@@ -74,6 +90,23 @@ export default function MessageList() {
     }
 
     setActiveMenuMessageId(messageId);
+  };
+
+  const handleJumpToMessage = (messageId: string) => {
+    const originalMessage = channelMessages.find((message) => message.id === messageId);
+
+    if (!originalMessage) return;
+
+    setHighlightedMessageId(messageId);
+
+    requestAnimationFrame(() => {
+      const messageElement = document.getElementById(`message-${messageId}`);
+
+      messageElement?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    });
   };
 
   return (
@@ -103,8 +136,15 @@ export default function MessageList() {
                   message={message}
                   isMenuOpen={activeMenuMessageId === message.id}
                   menuPlacement={menuPlacement}
+                  isHighlighted={highlightedMessageId === message.id}
+                  isOriginalAvailable={
+                    message.replyTo
+                      ? channelMessages.some((item) => item.id === message.replyTo?.messageId)
+                      : false
+                  }
                   onToggleMenu={(button) => handleToggleMenu(message.id, button)}
                   onCloseMenu={() => setActiveMenuMessageId(null)}
+                  onJumpToMessage={handleJumpToMessage}
                 />
               ))}
 

@@ -35,6 +35,8 @@ export interface MockMessage {
   avatar: "accent" | "neutral";
   reactions: MockReaction[];
   isOwn: boolean;
+  isEdited?: boolean;
+  editedAt?: string;
   replyTo?: MockReply;
 }
 

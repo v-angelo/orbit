@@ -12,16 +12,22 @@ interface MessageItemProps {
   message: MockMessage;
   isMenuOpen: boolean;
   menuPlacement: "above" | "below";
+  isHighlighted: boolean;
+  isOriginalAvailable: boolean;
   onToggleMenu: (button: HTMLButtonElement) => void;
   onCloseMenu: () => void;
+  onJumpToMessage: (messageId: string) => void;
 }
 
 export default function MessageItem({
   message,
   isMenuOpen,
   menuPlacement,
+  isHighlighted,
+  isOriginalAvailable,
   onToggleMenu,
   onCloseMenu,
+  onJumpToMessage,
 }: MessageItemProps) {
   const { toggleReaction, editMessage, deleteMessage, startReply } = useCommunity();
 
@@ -76,7 +82,9 @@ export default function MessageItem({
   return (
     <article
       id={`message-${message.id}`}
-      className="group relative flex scroll-mb-32 gap-3 rounded-xl p-3 transition-colors hover:bg-surface-hover"
+      className={`group relative flex scroll-mb-32 gap-3 rounded-xl p-3 transition-colors duration-300 ${
+        isHighlighted ? "bg-accent-soft ring-1 ring-accent/40" : "hover:bg-surface-hover"
+      }`}
     >
       {/* Avatar */}
       <div
@@ -93,13 +101,20 @@ export default function MessageItem({
       <div className="min-w-0 flex-1 pr-8">
         <div className="mb-1 flex flex-wrap items-baseline gap-2">
           <span className="text-sm font-semibold text-foreground">{message.author}</span>
-
           <span className="text-xs text-muted">{message.timestamp}</span>
+          {message.isEdited && (
+            <span className="text-[11px] text-muted">(edited {message.editedAt})</span>
+          )}{" "}
         </div>
 
         {/* Reply Preview */}
-        {message.replyTo && <MessageReplyPreview replyTo={message.replyTo} />}
-
+        {message.replyTo && (
+          <MessageReplyPreview
+            replyTo={message.replyTo}
+            isOriginalAvailable={isOriginalAvailable}
+            onClick={() => onJumpToMessage(message.replyTo!.messageId)}
+          />
+        )}
         {/* Message Body */}
         {isEditing ? (
           <div className="mt-2 space-y-2">

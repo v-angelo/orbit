@@ -188,7 +188,15 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
       ...previousMessages,
       [selectedChannelId]: (previousMessages[selectedChannelId] ?? []).map((message) =>
         message.id === messageId && message.isOwn
-          ? { ...message, content: trimmedContent }
+          ? {
+              ...message,
+              content: trimmedContent,
+              isEdited: true,
+              editedAt: new Date().toLocaleTimeString([], {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            }
           : message,
       ),
     }));
