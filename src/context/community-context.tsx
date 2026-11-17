@@ -7,6 +7,13 @@ import type { MockMessage } from "@/constants/mock-data";
 
 type ActiveDrawer = "channels" | "members" | null;
 
+type SearchNavigationDirection = "previous" | "next";
+
+interface SearchNavigationRequest {
+  direction: SearchNavigationDirection;
+  id: number;
+}
+
 interface CommunityContextType {
   selectedCommunityId: string;
   selectedChannelId: string;
@@ -14,6 +21,10 @@ interface CommunityContextType {
   replyToMessage: MockMessage | null;
   activeDrawer: ActiveDrawer;
   isMemberSidebarOpen: boolean;
+  searchQuery: string;
+  searchNavigationRequest: SearchNavigationRequest | null;
+  requestSearchNavigation: (direction: SearchNavigationDirection) => void;
+  setSearchQuery: (query: string) => void;
   selectCommunity: (communityId: string) => void;
   selectChannel: (channelId: string) => void;
   sendMessage: (content: string) => void;
@@ -40,6 +51,7 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
   const [replyToMessage, setReplyToMessage] = useState<MockMessage | null>(null);
   const [activeDrawer, setActiveDrawer] = useState<ActiveDrawer>(null);
   const [isMemberSidebarOpen, setIsMemberSidebarOpen] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const openDrawer = (drawer: ActiveDrawer) => {
     setActiveDrawer(drawer);
@@ -52,6 +64,9 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
   const toggleMemberSidebar = () => {
     setIsMemberSidebarOpen((previous) => !previous);
   };
+
+  const [searchNavigationRequest, setSearchNavigationRequest] =
+    useState<SearchNavigationRequest | null>(null);
 
   const selectCommunity = (communityId: string) => {
     const community = communities.find((item) => item.id === communityId);
@@ -67,6 +82,7 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
       setSelectedChannelId(firstTextChannel.id);
     }
 
+    setSearchQuery("");
     closeDrawer();
   };
 
@@ -79,6 +95,7 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
 
     setSelectedChannelId(channelId);
     setReplyToMessage(null);
+    setSearchQuery("");
     closeDrawer();
   };
 
@@ -211,6 +228,13 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
     }));
   };
 
+  const requestSearchNavigation = (direction: SearchNavigationDirection) => {
+    setSearchNavigationRequest((previous) => ({
+      direction,
+      id: (previous?.id ?? 0) + 1,
+    }));
+  };
+
   return (
     <CommunityContext.Provider
       value={{
@@ -220,6 +244,10 @@ export function CommunityProvider({ children }: CommunityProviderProps) {
         replyToMessage,
         activeDrawer,
         isMemberSidebarOpen,
+        searchQuery,
+        searchNavigationRequest,
+        requestSearchNavigation,
+        setSearchQuery,
         selectCommunity,
         selectChannel,
         sendMessage,

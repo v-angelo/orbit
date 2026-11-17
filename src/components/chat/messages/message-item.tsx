@@ -8,8 +8,11 @@ import type { MockMessage } from "@/constants/mock-data";
 import MessageActions from "./message-actions";
 import MessageReplyPreview from "./message-reply-preview";
 
+import { AnimatePresence, motion } from "motion/react";
+
 interface MessageItemProps {
   message: MockMessage;
+  searchQuery: string;
   isMenuOpen: boolean;
   menuPlacement: "above" | "below";
   isHighlighted: boolean;
@@ -19,8 +22,28 @@ interface MessageItemProps {
   onJumpToMessage: (messageId: string) => void;
 }
 
+function highlightText(text: string, query: string) {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) return text;
+
+  const escapedQuery = trimmedQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const regex = new RegExp(`(${escapedQuery})`, "gi");
+
+  return text.split(regex).map((part, index) =>
+    part.toLowerCase() === trimmedQuery.toLowerCase() ? (
+      <mark key={index} className="rounded-sm bg-accent/25 px-0.5 text-foreground">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
+  );
+}
+
 export default function MessageItem({
   message,
+  searchQuery,
   isMenuOpen,
   menuPlacement,
   isHighlighted,
@@ -100,11 +123,13 @@ export default function MessageItem({
       {/* Message Content */}
       <div className="min-w-0 flex-1 pr-8">
         <div className="mb-1 flex flex-wrap items-baseline gap-2">
-          <span className="text-sm font-semibold text-foreground">{message.author}</span>
+          <span className="text-sm font-semibold text-foreground">
+            {highlightText(message.author, searchQuery)}
+          </span>
           <span className="text-xs text-muted">{message.timestamp}</span>
           {message.isEdited && (
             <span className="text-[11px] text-muted">(edited {message.editedAt})</span>
-          )}{" "}
+          )}
         </div>
 
         {/* Reply Preview */}
@@ -147,32 +172,39 @@ export default function MessageItem({
           </div>
         ) : (
           <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground">
-            {message.content}
+            {highlightText(message.content, searchQuery)}
           </p>
         )}
 
         {/* Reactions */}
         {message.reactions.length > 0 && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
-            {message.reactions.map((reaction) => (
-              <button
-                key={reaction.emoji}
-                type="button"
-                onClick={() => handleReaction(reaction.emoji)}
-                aria-label={`${reaction.emoji} reaction, ${reaction.count} ${
-                  reaction.count === 1 ? "reaction" : "reactions"
-                }`}
-                aria-pressed={reaction.reacted}
-                className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors ${
-                  reaction.reacted
-                    ? "border-accent/40 bg-accent-soft text-accent"
-                    : "border-border bg-surface-hover text-muted hover:border-accent/40 hover:bg-accent-soft hover:text-accent"
-                }`}
-              >
-                <span>{reaction.emoji}</span>
-                <span className="font-medium tabular-nums">{reaction.count}</span>
-              </button>
-            ))}
+            <AnimatePresence initial={false} mode="popLayout">
+              {message.reactions.map((reaction) => (
+                <motion.button
+                  key={`${reaction.emoji}-${reaction.count}-${reaction.reacted}`}
+                  type="button"
+                  layout
+                  initial={{ opacity: 0, scale: 0.75 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.75 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  onClick={() => handleReaction(reaction.emoji)}
+                  aria-label={`${reaction.emoji} reaction, ${reaction.count} ${
+                    reaction.count === 1 ? "reaction" : "reactions"
+                  }`}
+                  aria-pressed={reaction.reacted}
+                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors ${
+                    reaction.reacted
+                      ? "border-accent/40 bg-accent-soft text-accent"
+                      : "border-border bg-surface-hover text-muted hover:border-accent/40 hover:bg-accent-soft hover:text-accent"
+                  }`}
+                >
+                  <span>{reaction.emoji}</span>
+                  <span className="font-medium tabular-nums">{reaction.count}</span>
+                </motion.button>
+              ))}
+            </AnimatePresence>
           </div>
         )}
 

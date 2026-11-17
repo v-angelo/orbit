@@ -1,9 +1,12 @@
 "use client";
 
-import { Hash, Inbox, Menu, Pin, Search, UsersRound } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Hash, Inbox, Menu, Pin, Search, UsersRound, X } from "lucide-react";
 
 import { communities } from "@/constants/mock-data";
 import { useCommunity } from "@/context/community-context";
+
+import { AnimatePresence, motion } from "motion/react";
 
 export default function ChatHeader() {
   const {
@@ -12,13 +15,50 @@ export default function ChatHeader() {
     openDrawer,
     isMemberSidebarOpen,
     toggleMemberSidebar,
+    searchQuery,
+    setSearchQuery,
+    requestSearchNavigation,
   } = useCommunity();
+
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const selectedCommunity = communities.find((community) => community.id === selectedCommunityId);
 
   const selectedChannel = selectedCommunity?.channels.find(
     (channel) => channel.id === selectedChannelId,
   );
+
+  useEffect(() => {
+    if (!isSearchOpen) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsSearchOpen(false);
+        setSearchQuery("");
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen, setSearchQuery]);
+
+  const handleCloseSearch = () => {
+    setIsSearchOpen(false);
+    setSearchQuery("");
+  };
+
+  const handleSearchKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!searchQuery.trim()) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      requestSearchNavigation("next");
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      requestSearchNavigation("previous");
+    }
+  };
 
   if (!selectedChannel) return null;
 
@@ -45,6 +85,58 @@ export default function ChatHeader() {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 text-muted sm:gap-4">
+        {/* Search */}
+        <AnimatePresence mode="wait" initial={false}>
+          {isSearchOpen ? (
+            <motion.div
+              key="search-input"
+              initial={{ opacity: 0, width: 0, x: 8 }}
+              animate={{ opacity: 1, width: 208, x: 0 }}
+              exit={{ opacity: 0, width: 0, x: 8 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="flex shrink-0 items-center gap-2 overflow-hidden rounded-lg border border-border bg-background px-2.5 py-2 sm:w-52"
+            >
+              <Search size={16} className="shrink-0 text-muted" />
+
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                onKeyDown={handleSearchKeyDown}
+                placeholder="Search messages..."
+                aria-label="Search messages in this channel"
+                aria-keyshortcuts="ArrowUp ArrowDown"
+                autoFocus
+                className="min-w-0 flex-1 bg-transparent text-xs text-foreground outline-none placeholder:text-muted sm:text-sm"
+              />
+
+              <button
+                type="button"
+                onClick={handleCloseSearch}
+                aria-label="Close search"
+                className="shrink-0 rounded p-0.5 transition-colors hover:bg-surface-hover hover:text-foreground"
+              >
+                <X size={15} />
+              </button>
+            </motion.div>
+          ) : (
+            <motion.button
+              key="search-button"
+              type="button"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              onClick={() => setIsSearchOpen(true)}
+              aria-label="Search messages"
+              title="Search messages"
+              className="rounded-md p-2 transition-colors hover:bg-surface-hover hover:text-foreground"
+            >
+              <Search size={19} />
+            </motion.button>
+          )}
+        </AnimatePresence>
+
         {/* Mobile and Tablet Member List */}
         <button
           type="button"
@@ -72,8 +164,6 @@ export default function ChatHeader() {
           size={18}
           className="hidden cursor-pointer transition-colors hover:text-foreground sm:block"
         />
-
-        <Search size={19} className="cursor-pointer transition-colors hover:text-foreground" />
 
         <Inbox size={19} className="cursor-pointer transition-colors hover:text-foreground" />
       </div>
