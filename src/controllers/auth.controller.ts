@@ -1,9 +1,39 @@
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 
 import connectDB from "@/lib/mongodb";
 import User from "@/models/user.model";
+
+import { createToken, verifyToken } from "@/lib/auth";
 import { loginSchema, registerSchema } from "@/schemas/auth.schema";
+
+const COOKIE_NAME = "orbit_token";
+const COOKIE_MAX_AGE = 60 * 60 * 24; // 1 day
+
+async function setAuthCookie(token: string) {
+  const cookieStore = await cookies();
+
+  cookieStore.set(COOKIE_NAME, token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: COOKIE_MAX_AGE,
+  });
+}
+
+async function clearAuthCookie() {
+  const cookieStore = await cookies();
+
+  cookieStore.set(COOKIE_NAME, "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 0,
+  });
+}
 
 function validationErrors(issues: { path: PropertyKey[]; message: string }[]) {
   return issues.map((issue) => ({
@@ -38,7 +68,6 @@ export async function registerController(request: Request) {
 
     await connectDB();
 
-    // Check whether the username or email is already registered
     const existingUser = await User.findOne({
       $or: [{ username }, { email }],
     });
@@ -59,7 +88,6 @@ export async function registerController(request: Request) {
       );
     }
 
-    // Hash the password before saving it
     const hashedPassword = await bcrypt.hash(password, 12);
 
     const user = await User.create({
@@ -67,6 +95,11 @@ export async function registerController(request: Request) {
       email,
       password: hashedPassword,
     });
+
+    // Create a JWT and authenticate the newly registered user
+    const token = await createToken(user._id.toString());
+
+    await setAuthCookie(token);
 
     return NextResponse.json(
       {
@@ -125,7 +158,6 @@ export async function loginController(request: Request) {
 
     await connectDB();
 
-    // Explicitly retrieve the password hash
     const user = await User.findOne({ email }).select("+password");
 
     if (!user) {
@@ -138,7 +170,6 @@ export async function loginController(request: Request) {
       );
     }
 
-    // Compare the submitted password with the stored hash
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -150,6 +181,11 @@ export async function loginController(request: Request) {
         { status: 401 },
       );
     }
+
+    // Create a JWT and authenticate the user
+    const token = await createToken(user._id.toString());
+
+    await setAuthCookie(token);
 
     return NextResponse.json(
       {
@@ -170,6 +206,104 @@ export async function loginController(request: Request) {
       {
         success: false,
         message: "Something went wrong while logging in.",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+// Log out the current user
+export async function logoutController() {
+  try {
+    await clearAuthCookie();
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "Logged out successfully.",
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Logout error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Something went wrong while logging out.",
+      },
+      { status: 500 },
+    );
+  }
+}
+
+// Get the currently authenticated user
+export async function getCurrentUserController() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get(COOKIE_NAME)?.value;
+
+    // Check whether an authentication cookie exists
+    if (!token) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Authentication required.",
+        },
+        { status: 401 },
+      );
+    }
+
+    // Verify the JWT and retrieve the user ID
+    const payload = await verifyToken(token);
+
+    if (!payload) {
+      await clearAuthCookie();
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Invalid or expired authentication token.",
+        },
+        { status: 401 },
+      );
+    }
+
+    await connectDB();
+
+    // Retrieve the authenticated user
+    const user = await User.findById(payload.userId);
+
+    if (!user) {
+      await clearAuthCookie();
+
+      return NextResponse.json(
+        {
+          success: false,
+          message: "User account not found.",
+        },
+        { status: 401 },
+      );
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        user: {
+          id: user._id.toString(),
+          username: user.username,
+          email: user.email,
+        },
+      },
+      { status: 200 },
+    );
+  } catch (error) {
+    console.error("Get current user error:", error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        message: "Something went wrong while retrieving your account.",
       },
       { status: 500 },
     );
