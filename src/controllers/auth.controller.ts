@@ -96,15 +96,11 @@ export async function registerController(request: Request) {
       password: hashedPassword,
     });
 
-    // Create a JWT and authenticate the newly registered user
-    const token = await createToken(user._id.toString());
-
-    await setAuthCookie(token);
-
+    // Return the newly created account without authenticating the user
     return NextResponse.json(
       {
         success: true,
-        message: "Account created successfully.",
+        message: "Account created successfully. Please log in.",
         user: {
           id: user._id.toString(),
           username: user.username,

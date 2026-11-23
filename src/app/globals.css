@@ -21,6 +21,7 @@
 
   --success: #4ade80;
   --danger: #fb7185;
+  --warning: #fbbf24;
 }
 
 /* Dark Theme: Ocean */
@@ -43,6 +44,7 @@
 
   --success: #4ade80;
   --danger: #fb7185;
+  --warning: #fbbf24;
 }
 
 /* Dark Theme: Forest */
@@ -65,6 +67,7 @@
 
   --success: #86efac;
   --danger: #fb7185;
+  --warning: #fbbf24;
 }
 
 /* Light Theme: Daylight */
@@ -87,6 +90,7 @@
 
   --success: #16a34a;
   --danger: #e11d48;
+  --warning: #b7791f;
 }
 
 /* Light Theme: Sunset */
@@ -109,6 +113,7 @@
 
   --success: #16865b;
   --danger: #dc4560;
+  --warning: #b7791f;
 }
 
 /* Variable Mapping */
@@ -130,10 +135,28 @@
 
   --color-success: var(--success);
   --color-danger: var(--danger);
+  --color-warning: var(--warning);
 
   /* fonts */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+/* Sonner Toast Styling */
+[data-sonner-toast][data-type="success"] [data-title] {
+  color: var(--success) !important;
+}
+
+[data-sonner-toast][data-type="error"] [data-title] {
+  color: var(--danger) !important;
+}
+
+[data-sonner-toast][data-type="info"] [data-title] {
+  color: var(--accent) !important;
+}
+
+[data-sonner-toast][data-type="warning"] [data-title] {
+  color: var(--warning) !important;
 }
 
 /* Global Styles */

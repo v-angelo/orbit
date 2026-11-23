@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
+import { Toaster } from "sonner";
+import { CheckCircle, CircleAlert, Info, TriangleAlert } from "lucide-react";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,7 +31,34 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+
+        <Toaster
+          position="top-right"
+          icons={{
+            success: <CheckCircle size={18} className="text-success" />,
+            error: <CircleAlert size={18} className="text-danger" />,
+            info: <Info size={18} className="text-accent" />,
+            warning: <TriangleAlert size={18} className="text-amber-600" />,
+          }}
+          toastOptions={{
+            style: {
+              background: "var(--surface)",
+              color: "var(--foreground)",
+              border: "1px solid var(--border)",
+              borderRadius: "14px",
+              boxShadow: "0 8px 30px rgba(0, 0, 0, 0.08)",
+            },
+            classNames: {
+              success: "!border-success/30",
+              error: "!border-danger/30",
+              info: "!border-accent/30",
+              warning: "!border-amber-600/30",
+            },
+          }}
+        />
+      </body>
     </html>
   );
 }

@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import { motion } from "motion/react";
 import { ArrowRight, Check, Eye, EyeOff, LockKeyhole, Mail, Orbit, UserRound } from "lucide-react";
+
+import { useRouter } from "next/navigation";
+import { AuthApiError, register } from "@/services/auth.service";
+
+import { toast } from "sonner";
 
 interface RegisterFormData {
   username: string;
@@ -54,7 +59,9 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const updateField = (field: keyof RegisterFormData, value: string) => {
     setFormData((prev) => ({
@@ -62,7 +69,10 @@ export default function RegisterForm() {
       [field]: value,
     }));
 
-    setIsSubmitted(false);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: undefined,
+    }));
   };
 
   const validateForm = (): boolean => {
@@ -85,8 +95,8 @@ export default function RegisterForm() {
       newErrors.email = "Please enter a valid email address.";
     }
 
-    if (formData.password.length < 8) {
-      newErrors.password = "Password must contain at least 8 characters.";
+    if (formData.password.length < 6) {
+      newErrors.password = "Password must contain at least 6 characters.";
     }
 
     if (!formData.confirmPassword) {
@@ -100,19 +110,61 @@ export default function RegisterForm() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!validateForm()) return;
 
-    // API integration here.
-    setIsSubmitted(true);
+    setIsLoading(true);
+
+    try {
+      const result = await register(formData.username, formData.email, formData.password);
+
+      toast.success(result.message);
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      router.replace("/login");
+      router.refresh();
+    } catch (error) {
+      if (error instanceof AuthApiError) {
+        if (error.errors?.length) {
+          // Backend validation errors
+          const backendErrors: RegisterFormErrors = {};
+
+          for (const issue of error.errors) {
+            if (
+              issue.field === "username" ||
+              issue.field === "email" ||
+              issue.field === "password"
+            ) {
+              backendErrors[issue.field] = issue.message;
+            }
+          }
+
+          setErrors((prev) => ({
+            ...prev,
+            ...backendErrors,
+          }));
+        } else if (error.field === "username" || error.field === "email") {
+          // Duplicate username or email
+          toast.error(error.message);
+        } else {
+          // Other API errors
+          toast.error(error.message);
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const passwordRequirements = [
     {
-      label: "At least 8 characters",
-      met: formData.password.length >= 8,
+      label: "At least 6 characters",
+      met: formData.password.length >= 6,
     },
   ];
 
@@ -296,25 +348,18 @@ export default function RegisterForm() {
           <motion.div variants={itemVariants}>
             <motion.button
               type="submit"
-              whileHover={{ scale: 1.015 }}
-              whileTap={{ scale: 0.98 }}
-              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-background shadow-lg shadow-accent/15 transition-colors hover:bg-accent-hover"
+              disabled={isLoading}
+              whileHover={{ scale: isLoading ? 1 : 1.015 }}
+              whileTap={{ scale: isLoading ? 1 : 0.98 }}
+              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-background shadow-lg shadow-accent/15 transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Create account
-              <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+              {isLoading ? "Creating account..." : "Create account"}
+
+              {!isLoading && (
+                <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+              )}
             </motion.button>
           </motion.div>
-
-          {/* Validation Success - Temporary */}
-          {isSubmitted && (
-            <motion.p
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center text-sm text-success"
-            >
-              Form validation passed! Ready for API integration.
-            </motion.p>
-          )}
         </form>
       </motion.div>
 

@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type SubmitEvent } from "react";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, Orbit } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { AuthApiError, login } from "@/services/auth.service";
+import { toast } from "sonner";
 
 interface LoginFormData {
   email: string;
@@ -46,7 +49,9 @@ export default function LoginForm() {
   const [formData, setFormData] = useState<LoginFormData>(initialValues);
   const [errors, setErrors] = useState<LoginFormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const updateField = (field: keyof LoginFormData, value: string) => {
     setFormData((prev) => ({
@@ -54,13 +59,16 @@ export default function LoginForm() {
       [field]: value,
     }));
 
-    setIsSubmitted(false);
+    setErrors((prev) => ({
+      ...prev,
+      [field]: undefined,
+    }));
   };
 
   const validateForm = (): boolean => {
     const newErrors: LoginFormErrors = {};
 
-    const email = formData.email.trim().toLowerCase();
+    const email = formData.email.trim();
 
     if (!email) {
       newErrors.email = "Email is required.";
@@ -68,7 +76,7 @@ export default function LoginForm() {
       newErrors.email = "Please enter a valid email address.";
     }
 
-    if (!formData.password) {
+    if (!formData.password.trim()) {
       newErrors.password = "Password is required.";
     }
 
@@ -77,13 +85,46 @@ export default function LoginForm() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     if (!validateForm()) return;
 
-    // API integration here.
-    setIsSubmitted(true);
+    setIsLoading(true);
+
+    try {
+      const result = await login(formData.email.trim().toLowerCase(), formData.password);
+
+      toast.success(result.message);
+
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      router.replace("/chat");
+      router.refresh();
+    } catch (error) {
+      if (error instanceof AuthApiError) {
+        if (error.errors?.length) {
+          const backendErrors: LoginFormErrors = {};
+
+          for (const issue of error.errors) {
+            if (issue.field === "email" || issue.field === "password") {
+              backendErrors[issue.field] = issue.message;
+            }
+          }
+
+          setErrors((prev) => ({
+            ...prev,
+            ...backendErrors,
+          }));
+        } else {
+          toast.error(error.message);
+        }
+      } else {
+        toast.error("Something went wrong. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -115,7 +156,7 @@ export default function LoginForm() {
         variants={itemVariants}
         className="rounded-2xl border border-border bg-surface p-6 shadow-xl shadow-black/5 sm:p-8"
       >
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} noValidate className="space-y-5">
           {/* Email */}
           <motion.div variants={itemVariants}>
             <label htmlFor="email" className="mb-2 block text-sm font-medium">
@@ -185,25 +226,18 @@ export default function LoginForm() {
           <motion.div variants={itemVariants}>
             <motion.button
               type="submit"
-              whileHover={{ scale: 1.015 }}
-              whileTap={{ scale: 0.98 }}
-              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-background shadow-lg shadow-accent/15 transition-colors hover:bg-accent-hover"
+              disabled={isLoading}
+              whileHover={{ scale: isLoading ? 1 : 1.015 }}
+              whileTap={{ scale: isLoading ? 1 : 0.98 }}
+              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-accent px-4 py-3 text-sm font-semibold text-background shadow-lg shadow-accent/15 transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
             >
-              Sign in
-              <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+              {isLoading ? "Signing in..." : "Sign in"}
+
+              {!isLoading && (
+                <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
+              )}
             </motion.button>
           </motion.div>
-
-          {/* Validation Success - Temporary */}
-          {isSubmitted && (
-            <motion.p
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-center text-sm text-success"
-            >
-              Form validation passed! Ready for API integration.
-            </motion.p>
-          )}
         </form>
       </motion.div>
 
