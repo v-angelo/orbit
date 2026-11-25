@@ -40,7 +40,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             success: <CheckCircle size={18} className="text-success" />,
             error: <CircleAlert size={18} className="text-danger" />,
             info: <Info size={18} className="text-accent" />,
-            warning: <TriangleAlert size={18} className="text-amber-600" />,
+            warning: <TriangleAlert size={18} className="text-warning" />,
           }}
           toastOptions={{
             style: {
@@ -54,7 +54,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               success: "!border-success/30",
               error: "!border-danger/30",
               info: "!border-accent/30",
-              warning: "!border-amber-600/30",
+              warning: "!border-warning/30",
             },
           }}
         />

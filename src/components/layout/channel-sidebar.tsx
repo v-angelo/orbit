@@ -1,11 +1,18 @@
 "use client";
 
-import { ChevronDown, Hash, Headphones, Plus, Settings } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronDown, Hash, Headphones, Plus, Power, Settings } from "lucide-react";
+import { toast } from "sonner";
 
 import { communities } from "@/constants/mock-data";
+import { useAuth } from "@/context/auth-context";
 import { useCommunity } from "@/context/community-context";
 
 export default function ChannelSidebar() {
+  const router = useRouter();
+
+  const { user, signOut, isSigningOut } = useAuth();
+
   const { selectedCommunityId, selectedChannelId, selectChannel } = useCommunity();
 
   const selectedCommunity = communities.find((community) => community.id === selectedCommunityId);
@@ -15,6 +22,21 @@ export default function ChannelSidebar() {
   const textChannels = selectedCommunity.channels.filter((channel) => channel.type === "text");
 
   const voiceChannels = selectedCommunity.channels.filter((channel) => channel.type === "voice");
+
+  // Handle user logout
+  const handleLogout = async () => {
+    try {
+      await signOut();
+
+      toast.success("Logged out successfully.");
+
+      router.replace("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+
+      toast.error(error instanceof Error ? error.message : "Unable to log out. Please try again.");
+    }
+  };
 
   return (
     <aside className="flex h-full min-h-0 flex-col border-r border-border bg-surface">
@@ -89,17 +111,34 @@ export default function ChannelSidebar() {
 
       {/* Current User */}
       <div className="flex shrink-0 items-center gap-3 border-t border-border p-3">
-        <div className="flex size-9 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent">
-          U
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent">
+          {user?.username.charAt(0).toUpperCase() ?? "U"}
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground">Username</p>
-
+          <p className="truncate text-sm font-medium text-foreground">{user?.username ?? "User"}</p>
           <p className="text-xs text-muted">Online</p>
         </div>
 
-        <Settings size={17} className="text-muted" />
+        <button
+          type="button"
+          aria-label="Settings"
+          title="Settings"
+          className="cursor-pointer rounded-md p-2 text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
+        >
+          <Settings size={17} />
+        </button>
+
+        <button
+          type="button"
+          onClick={handleLogout}
+          disabled={isSigningOut}
+          aria-label="Log out"
+          title="Log out"
+          className="cursor-pointer rounded-md p-2 text-muted transition-colors hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          <Power size={17} />
+        </button>
       </div>
     </aside>
   );
