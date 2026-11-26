@@ -1,7 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { ChevronDown, Hash, Headphones, Plus, Power, Settings } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { ChevronDown, Hash, Headphones, Plus, Power } from "lucide-react";
 import { toast } from "sonner";
 
 import { communities } from "@/constants/mock-data";
@@ -10,6 +10,7 @@ import { useCommunity } from "@/context/community-context";
 
 export default function ChannelSidebar() {
   const router = useRouter();
+  const pathname = usePathname();
 
   const { user, signOut, isSigningOut } = useAuth();
 
@@ -22,6 +23,15 @@ export default function ChannelSidebar() {
   const textChannels = selectedCommunity.channels.filter((channel) => channel.type === "text");
 
   const voiceChannels = selectedCommunity.channels.filter((channel) => channel.type === "voice");
+
+  // Handle channel selection and navigation
+  const handleChannelSelect = (channelId: string) => {
+    selectChannel(channelId);
+
+    if (pathname === "/settings") {
+      window.dispatchEvent(new Event("orbit:settings-exit"));
+    }
+  };
 
   // Handle user logout
   const handleLogout = async () => {
@@ -47,11 +57,6 @@ export default function ChannelSidebar() {
 
           <ChevronDown size={16} className="text-muted" />
         </div>
-
-        <Settings
-          size={17}
-          className="cursor-pointer text-muted transition-colors hover:text-foreground"
-        />
       </div>
 
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto p-3">
@@ -71,7 +76,7 @@ export default function ChannelSidebar() {
                 <button
                   key={channel.id}
                   type="button"
-                  onClick={() => selectChannel(channel.id)}
+                  onClick={() => handleChannelSelect(channel.id)}
                   aria-pressed={isActive}
                   className={`flex w-full cursor-pointer items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm transition-colors ${
                     isActive
@@ -97,13 +102,15 @@ export default function ChannelSidebar() {
 
           <div className="space-y-1">
             {voiceChannels.map((channel) => (
-              <div
+              <button
                 key={channel.id}
-                className="flex items-center gap-2 rounded-md px-2.5 py-2 text-sm text-muted"
+                type="button"
+                onClick={() => handleChannelSelect(channel.id)}
+                className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
               >
                 <Headphones size={17} />
-                <span>{channel.name}</span>
-              </div>
+                <span className="truncate">{channel.name}</span>
+              </button>
             ))}
           </div>
         </section>
@@ -117,17 +124,8 @@ export default function ChannelSidebar() {
 
         <div className="min-w-0 flex-1">
           <p className="truncate text-sm font-medium text-foreground">{user?.username ?? "User"}</p>
-          <p className="text-xs text-muted">Online</p>
+          <p className="text-xs text-success/70">Online</p>
         </div>
-
-        <button
-          type="button"
-          aria-label="Settings"
-          title="Settings"
-          className="cursor-pointer rounded-md p-2 text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
-        >
-          <Settings size={17} />
-        </button>
 
         <button
           type="button"

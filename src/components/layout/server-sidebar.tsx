@@ -1,11 +1,24 @@
 "use client";
 
 import { Compass, Plus, Settings } from "lucide-react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+
 import { communities } from "@/constants/mock-data";
 import { useCommunity } from "@/context/community-context";
 
 export default function ServerSidebar() {
+  const pathname = usePathname();
+
   const { selectedCommunityId, selectCommunity } = useCommunity();
+
+  const handleCommunitySelect = (communityId: string) => {
+    selectCommunity(communityId);
+
+    if (pathname === "/settings") {
+      window.dispatchEvent(new Event("orbit:settings-exit"));
+    }
+  };
 
   return (
     <aside className="flex h-dvh flex-col items-center gap-4 overflow-y-auto border-r border-border bg-surface py-4">
@@ -27,7 +40,7 @@ export default function ServerSidebar() {
             key={community.id}
             type="button"
             title={community.name}
-            onClick={() => selectCommunity(community.id)}
+            onClick={() => handleCommunitySelect(community.id)}
             className={`relative flex size-11 items-center justify-center rounded-2xl transition-all duration-200 ${
               isActive ? "rounded-xl bg-accent-soft" : "hover:rounded-xl hover:bg-surface-hover"
             }`}
@@ -48,13 +61,14 @@ export default function ServerSidebar() {
         <Plus size={23} />
       </button>
 
-      <button
-        type="button"
+      <Link
+        href="/settings"
+        aria-label="Account Settings"
         title="Settings"
         className="mt-auto flex size-11 items-center justify-center rounded-2xl text-muted transition-colors hover:bg-surface-hover hover:text-foreground"
       >
         <Settings size={21} />
-      </button>
+      </Link>
     </aside>
   );
 }
