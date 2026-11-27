@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 
 import ServerSidebar from "./server-sidebar";
@@ -14,44 +15,57 @@ interface AppShellProps {
 }
 
 function AppLayout({ children }: AppShellProps) {
+  const pathname = usePathname();
+  const isSettingsPage = pathname === "/settings";
+
   const { activeDrawer, closeDrawer, isMemberSidebarOpen } = useCommunity();
+
+  const showChannelDrawer = activeDrawer === "channels" && !isSettingsPage;
 
   return (
     <div
-      className={`grid h-dvh grid-cols-[4.5rem_minmax(0,1fr)] overflow-hidden bg-background transition-[grid-template-columns] duration-300 ease-in-out md:grid-cols-[4.5rem_15rem_minmax(0,1fr)] ${
-        isMemberSidebarOpen
-          ? "xl:grid-cols-[4.5rem_15rem_minmax(0,1fr)_15rem]"
-          : "xl:grid-cols-[4.5rem_15rem_minmax(0,1fr)_0rem]"
+      className={`grid h-dvh overflow-hidden bg-background transition-[grid-template-columns] duration-300 ease-in-out ${
+        isSettingsPage
+          ? "grid-cols-[4.5rem_minmax(0,1fr)]"
+          : `grid-cols-[4.5rem_minmax(0,1fr)] md:grid-cols-[4.5rem_15rem_minmax(0,1fr)] ${
+              isMemberSidebarOpen
+                ? "xl:grid-cols-[4.5rem_15rem_minmax(0,1fr)_15rem]"
+                : "xl:grid-cols-[4.5rem_15rem_minmax(0,1fr)_0rem]"
+            }`
       }`}
     >
       <ServerSidebar />
 
       {/* Desktop Channel Sidebar */}
-      <div className="hidden min-h-0 md:block">
-        <ChannelSidebar />
-      </div>
+      {!isSettingsPage && (
+        <div className="hidden min-h-0 md:block">
+          <ChannelSidebar />
+        </div>
+      )}
 
-      {/* Main Chat */}
+      {/* Main Content */}
       <main className="flex min-h-0 min-w-0 flex-col overflow-hidden">{children}</main>
 
       {/* Desktop Member Sidebar */}
-      <motion.div
-        className="hidden min-h-0 overflow-hidden xl:block"
-        animate={{
-          width: isMemberSidebarOpen ? "15rem" : "0rem",
-          opacity: isMemberSidebarOpen ? 1 : 0,
-        }}
-        transition={{
-          duration: 0.3,
-          ease: "easeInOut",
-        }}
-      >
-        <MemberSidebar />
-      </motion.div>
+      {!isSettingsPage && (
+        <motion.div
+          className="hidden min-h-0 overflow-hidden xl:block"
+          animate={{
+            width: isMemberSidebarOpen ? "15rem" : "0rem",
+            opacity: isMemberSidebarOpen ? 1 : 0,
+          }}
+          transition={{
+            duration: 0.3,
+            ease: "easeInOut",
+          }}
+        >
+          <MemberSidebar />
+        </motion.div>
+      )}
 
       {/* Mobile and Tablet Drawers */}
       <AnimatePresence>
-        {activeDrawer && (
+        {(showChannelDrawer || activeDrawer === "members") && !isSettingsPage && (
           <motion.div
             key="mobile-drawer"
             className="fixed inset-0 z-50 xl:hidden"
@@ -90,7 +104,7 @@ function AppLayout({ children }: AppShellProps) {
                 damping: 32,
               }}
             >
-              {activeDrawer === "channels" && <ChannelSidebar />}
+              {showChannelDrawer && <ChannelSidebar />}
               {activeDrawer === "members" && <MemberSidebar />}
             </motion.div>
           </motion.div>

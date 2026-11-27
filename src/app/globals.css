@@ -1,7 +1,30 @@
 @import "tailwindcss";
 
-/* Default, Dark Theme: Midnight */
+/* Default Dark Theme: Noir */
 :root,
+[data-theme="noir"] {
+  color-scheme: dark;
+
+  --background: #0b0b0d;
+  --surface: #141416;
+  --surface-hover: #1e1e21;
+  --surface-elevated: #19191c;
+
+  --foreground: #f1f1f2;
+  --muted: #929297;
+
+  --border: #29292d;
+
+  --accent: #b4b4bd;
+  --accent-hover: #d0d0d6;
+  --accent-soft: #29292f;
+
+  --success: #4ade80;
+  --danger: #fb7185;
+  --warning: #fbbf24;
+}
+
+/* Dark Theme: Midnight */
 [data-theme="midnight"] {
   color-scheme: dark;
 

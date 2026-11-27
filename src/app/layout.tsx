@@ -5,6 +5,8 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import { CheckCircle, CircleAlert, Info, TriangleAlert } from "lucide-react";
 
+import { ThemeProvider } from "@/context/theme-context";
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -27,12 +29,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      data-theme="midnight"
+      data-theme="noir"
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
 
         <Toaster
           position="top-right"

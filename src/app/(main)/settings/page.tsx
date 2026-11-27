@@ -17,6 +17,8 @@ import {
 
 import { AnimatePresence, motion } from "motion/react";
 
+import AppearanceSettings from "@/components/settings/sections/appearance";
+
 const settingsSections = [
   {
     id: "account",
@@ -186,6 +188,7 @@ export default function SettingsPage() {
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
                 >
+                  {/* Section Heading */}
                   <div className="mb-7 border-b border-border pb-5">
                     <div className="mb-2 flex items-center gap-3">
                       <activeSettings.icon size={22} className="text-accent" />
@@ -198,28 +201,32 @@ export default function SettingsPage() {
                     <p className="text-sm text-muted">{activeSettings.description}</p>
                   </div>
 
-                  {/* Placeholder Content */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.08 }}
-                    className="rounded-xl border border-border bg-surface p-6"
-                  >
-                    <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-accent-soft">
-                        <activeSettings.icon size={26} className="text-accent" />
+                  {/* Section Content */}
+                  {activeSettings.id === "appearance" ? (
+                    <AppearanceSettings />
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: 0.08 }}
+                      className="rounded-xl border border-border bg-surface p-6"
+                    >
+                      <div className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-accent-soft">
+                          <activeSettings.icon size={26} className="text-accent" />
+                        </div>
+
+                        <h3 className="mb-2 text-base font-semibold text-foreground">
+                          {activeSettings.label}
+                        </h3>
+
+                        <p className="max-w-sm text-sm leading-relaxed text-muted">
+                          This section is currently under development. We'll add its settings and
+                          functionality here.
+                        </p>
                       </div>
-
-                      <h3 className="mb-2 text-base font-semibold text-foreground">
-                        {activeSettings.label}
-                      </h3>
-
-                      <p className="max-w-sm text-sm leading-relaxed text-muted">
-                        This section is currently under development. We'll add its settings and
-                        functionality here.
-                      </p>
-                    </div>
-                  </motion.div>
+                    </motion.div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
