@@ -10,6 +10,7 @@ import SettingsSidebar from "./settings-sidebar";
 import { settingsSections, type SettingsSectionId } from "./settings-config";
 
 import AppearanceSettings from "./sections/appearance";
+import MyAccountSettings from "./sections/my-account";
 
 export default function SettingsLayout() {
   const [activeSection, setActiveSection] = useState<SettingsSectionId>("account");
@@ -75,6 +76,8 @@ export default function SettingsLayout() {
                   {/* Section Content */}
                   {activeSettings.id === "appearance" ? (
                     <AppearanceSettings />
+                  ) : activeSettings.id === "account" ? (
+                    <MyAccountSettings />
                   ) : (
                     <motion.div
                       initial={{ opacity: 0, y: 8 }}

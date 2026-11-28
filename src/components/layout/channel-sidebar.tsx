@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ChevronDown, Hash, Headphones, Plus, Power } from "lucide-react";
 import { toast } from "sonner";
@@ -7,6 +8,19 @@ import { toast } from "sonner";
 import { communities } from "@/constants/mock-data";
 import { useAuth } from "@/context/auth-context";
 import { useCommunity } from "@/context/community-context";
+
+type UserStatus = "online" | "idle" | "busy" | "invisible";
+
+const statusOptions: {
+  id: UserStatus;
+  label: string;
+  color: string;
+}[] = [
+  { id: "online", label: "Online", color: "bg-success" },
+  { id: "idle", label: "Idle", color: "bg-warning" },
+  { id: "busy", label: "Don't Disturb", color: "bg-danger" },
+  { id: "invisible", label: "Invisible", color: "bg-muted" },
+];
 
 export default function ChannelSidebar() {
   const router = useRouter();
@@ -16,6 +30,10 @@ export default function ChannelSidebar() {
 
   const { selectedCommunityId, selectedChannelId, selectChannel } = useCommunity();
 
+  const [status, setStatus] = useState<UserStatus>("online");
+  const [isStatusMenuOpen, setIsStatusMenuOpen] = useState(false);
+  const [hasAvatarError, setHasAvatarError] = useState(false);
+
   const selectedCommunity = communities.find((community) => community.id === selectedCommunityId);
 
   if (!selectedCommunity) return null;
@@ -23,6 +41,10 @@ export default function ChannelSidebar() {
   const textChannels = selectedCommunity.channels.filter((channel) => channel.type === "text");
 
   const voiceChannels = selectedCommunity.channels.filter((channel) => channel.type === "voice");
+
+  const currentStatus = statusOptions.find((option) => option.id === status)!;
+
+  const displayName = user?.displayName || user?.username || "User";
 
   // Handle channel selection and navigation
   const handleChannelSelect = (channelId: string) => {
@@ -117,23 +139,90 @@ export default function ChannelSidebar() {
       </div>
 
       {/* Current User */}
-      <div className="flex shrink-0 items-center gap-3 border-t border-border p-3">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-accent-soft text-sm font-semibold text-accent">
-          {user?.username.charAt(0).toUpperCase() ?? "U"}
+      <div className="flex shrink-0 items-center gap-2 border-t border-border p-3">
+        {/* Avatar */}
+        <div className="relative flex size-15 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-accent-soft text-sm font-semibold text-accent">
+          {user?.avatar && !hasAvatarError ? (
+            <img
+              key={user.avatar}
+              src={user.avatar}
+              alt={`${displayName}'s avatar`}
+              className="size-full object-cover"
+              onError={() => setHasAvatarError(true)}
+            />
+          ) : (
+            (user?.username?.charAt(0).toUpperCase() ?? "U")
+          )}
+
+          {/* Status Indicator */}
+          <span
+            className={`absolute right-0 bottom-0 size-3 rounded-full border-2 border-surface ${currentStatus.color}`}
+            title={currentStatus.label}
+          />
         </div>
 
+        {/* User Information */}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground">{user?.username ?? "User"}</p>
-          <p className="text-xs text-success/70">Online</p>
+          <p className="truncate text-sm font-semibold text-foreground">{displayName}</p>
+
+          <p className="truncate text-xs text-muted">@{user?.username ?? "username"}</p>
+
+          {/* Status Selector */}
+          <div className="relative mt-1">
+            <button
+              type="button"
+              onClick={() => setIsStatusMenuOpen((current) => !current)}
+              aria-expanded={isStatusMenuOpen}
+              aria-haspopup="true"
+              className="flex items-center gap-1.5 text-xs text-muted transition-colors hover:text-foreground"
+            >
+              <span className={`size-2 rounded-full ${currentStatus.color}`} />
+              <span>{currentStatus.label}</span>
+              <ChevronDown
+                size={12}
+                className={`transition-transform ${isStatusMenuOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            {isStatusMenuOpen && (
+              <div className="absolute bottom-full left-0 z-30 mb-2 w-44 rounded-lg border border-border bg-surface-elevated p-1.5 shadow-xl">
+                <p className="px-2.5 py-2 text-[10px] font-semibold tracking-wider text-muted">
+                  SET YOUR STATUS
+                </p>
+
+                {statusOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    type="button"
+                    onClick={() => {
+                      setStatus(option.id);
+                      setIsStatusMenuOpen(false);
+                    }}
+                    className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-xs transition-colors ${
+                      status === option.id
+                        ? "bg-accent-soft text-accent"
+                        : "text-muted hover:bg-surface-hover hover:text-foreground"
+                    }`}
+                  >
+                    <span className={`size-2.5 rounded-full ${option.color}`} />
+                    <span>{option.label}</span>
+
+                    {status === option.id && <span className="ml-auto text-accent">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* Logout */}
         <button
           type="button"
           onClick={handleLogout}
           disabled={isSigningOut}
           aria-label="Log out"
           title="Log out"
-          className="cursor-pointer rounded-md p-2 text-muted transition-colors hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
+          className="shrink-0 cursor-pointer rounded-md p-2 text-muted transition-colors hover:bg-danger/10 hover:text-danger disabled:cursor-not-allowed disabled:opacity-50"
         >
           <Power size={17} />
         </button>

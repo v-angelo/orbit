@@ -110,7 +110,7 @@ export async function updateUserProfileController(request: Request) {
       );
     }
 
-    const { username, displayName } = result.data;
+    const { username, displayName, avatar } = result.data;
 
     // Check whether the requested username is already taken
     if (username && username !== user.username) {
@@ -138,6 +138,10 @@ export async function updateUserProfileController(request: Request) {
 
     if (displayName !== undefined) {
       user.displayName = displayName;
+    }
+
+    if (avatar !== undefined) {
+      user.avatar = avatar;
     }
 
     await user.save();

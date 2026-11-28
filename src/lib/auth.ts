@@ -64,7 +64,9 @@ export async function getCurrentUser() {
 
     await connectDB();
 
-    const user = await User.findById(payload.userId).select("_id username email");
+    const user = await User.findById(payload.userId).select(
+      "_id username email displayName avatar",
+    );
 
     if (!user) {
       return null;
@@ -74,6 +76,8 @@ export async function getCurrentUser() {
       id: user._id.toString(),
       username: user.username,
       email: user.email,
+      displayName: user.displayName || user.username,
+      avatar: user.avatar || "",
     };
   } catch (error) {
     console.error("Get current user error:", error);
