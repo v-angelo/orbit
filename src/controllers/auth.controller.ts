@@ -94,6 +94,7 @@ export async function registerController(request: Request) {
       username,
       email,
       password: hashedPassword,
+      displayName: username,
     });
 
     // Return the newly created account without authenticating the user
